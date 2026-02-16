@@ -17,8 +17,8 @@ A localized E-ink dashboard for tracking McMaster University assignments via Ave
 1.  Clone this repository.
 2.  Create a file `src/secrets.h` based on the example below:
     ```cpp
-    const char* WIFI_SSID = "YOUR_WIFI_NAME";
-    const char* WIFI_PASS = "YOUR_WIFI_PASS";
+    #define WIFI_SSID "YOUR_WIFI_NAME";
+    #define WIFI_PASS = "YOUR_WIFI_PASS";
     ```
 3.  Add your course `.ics` URLs to the `myCourses` struct in `main.cpp`.
 4.  Build and upload using PlatformIO.

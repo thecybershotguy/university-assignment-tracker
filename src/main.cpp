@@ -2,25 +2,9 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <time.h>
-#include "secerts.h"
 #include "AppConfig.h"
 #include "RunTimeSync.h"
-
-// Add your specific course URLs here
-Course myCourses[] = {
-    {"Software Architecture", "https://avenue.cllmcmaster.ca/d2l/le/calendar/feed/user/feed.ics?feedOU=756156&token=ahng2k589kh86pee36c86"},
-    {"Parallel Programming", "https://avenue.cllmcmaster.ca/d2l/le/calendar/feed/user/feed.ics?feedOU=760099&token=ahng2k589kh86pee36c86"},
-    {"Lean Thinking", "https://avenue.cllmcmaster.ca/d2l/le/calendar/feed/user/feed.ics?feedOU=752846&token=ahng2k589kh86pee36c86"},
-    {"Software Security", "https://avenue.cllmcmaster.ca/d2l/le/calendar/feed/user/feed.ics?feedOU=761367&token=ahng2k589kh86pee36c86"}
-};
-
-AppConfig appConfig = {
-    WIFI_SSID, 
-    WIFI_PASS, 
-    -7 *3600,
-    myCourses, 
-    sizeof(myCourses) / sizeof(myCourses[0])
-};
+#include "storage/HardCodedConfigProvider.h"
 
 M5EPD_Canvas canvas(&M5.EPD);
 
@@ -30,6 +14,11 @@ void setup() {
     M5.EPD.SetRotation(90);
     M5.EPD.Clear(true);
     canvas.createCanvas(540, 960);
+
+    HardCodedConfigProvider provider;
+    AppConfig appConfig;
+    provider.load(appConfig);
+
     runRuntimeSync(appConfig, canvas);
     Serial.println("Updated. Sleeping...");
     delay(1000);
