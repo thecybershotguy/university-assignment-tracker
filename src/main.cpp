@@ -8,7 +8,8 @@
 
 M5EPD_Canvas canvas(&M5.EPD);
 
-void setup() {
+void setup()
+{
     M5.begin();
     Serial.begin(115200);
     M5.EPD.SetRotation(90);
@@ -22,7 +23,9 @@ void setup() {
     runRuntimeSync(appConfig, canvas);
     Serial.println("Updated. Sleeping...");
     delay(1000);
-    M5.shutdown(7200); 
+    M5.shutdown(7200);
 }
 
-void loop() {}
+void loop()
+{
+}

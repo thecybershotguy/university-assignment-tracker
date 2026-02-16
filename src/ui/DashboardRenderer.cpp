@@ -1,7 +1,6 @@
 #include "DashboardRenderer.h"
 #include <time.h>
 
-
 static String ymdFromTm(const struct tm& t)
 {
     char buf[12];
@@ -9,7 +8,8 @@ static String ymdFromTm(const struct tm& t)
     return String(buf);
 }
 
-void drawDashboard(M5EPD_Canvas &canvas, const std::vector<AssignmentItem> &items, bool networkOk, bool hasItems)
+void drawDashboard(M5EPD_Canvas& canvas, const std::vector<AssignmentItem>& items, bool networkOk,
+                   bool hasItems)
 {
     // ----------------------------
     // 1) Compute Today/Yesterday/Tomorrow labels
@@ -35,8 +35,8 @@ void drawDashboard(M5EPD_Canvas &canvas, const std::vector<AssignmentItem> &item
     struct tm* tm_tomorrow = localtime(&tomorrow_raw);
     String tomorrow = ymdFromTm(*tm_tomorrow);
 
-    Serial.printf("System Dates: Yest=%s, Today=%s, Tom=%s\n",
-                  yesterday.c_str(), today.c_str(), tomorrow.c_str());
+    Serial.printf("System Dates: Yest=%s, Today=%s, Tom=%s\n", yesterday.c_str(), today.c_str(),
+                  tomorrow.c_str());
 
     // ----------------------------
     // 2) Draw battery header (same logic you had)
@@ -49,30 +49,36 @@ void drawDashboard(M5EPD_Canvas &canvas, const std::vector<AssignmentItem> &item
     int bat_pct = (vol - 3300) * 100 / (4350 - 3300);
 
     // clamp max to 100
-    if (bat_pct > 100) bat_pct = 100;
+    if (bat_pct > 100)
+        bat_pct = 100;
     // clamp min to 0
-    if (bat_pct < 0) bat_pct = 0;
+    if (bat_pct < 0)
+        bat_pct = 0;
 
     // text size for header
     canvas.setTextSize(2);
 
-    if (networkOk) {
-    canvas.setTextColor(15);
-    canvas.drawString("ONLINE", 20, 10);
-    } else {
-    canvas.setTextColor(15);
-    canvas.drawString("OFFLINE", 20, 10);
+    if (networkOk)
+    {
+        canvas.setTextColor(15);
+        canvas.drawString("ONLINE", 20, 10);
+    }
+    else
+    {
+        canvas.setTextColor(15);
+        canvas.drawString("OFFLINE", 20, 10);
     }
 
-    if (!hasItems) {
-    canvas.setTextSize(3);
-    canvas.setTextColor(15);
-    canvas.drawString("No assignments found", 60, 200);
-    return;  // stop drawing further
+    if (!hasItems)
+    {
+        canvas.setTextSize(3);
+        canvas.setTextColor(15);
+        canvas.drawString("No assignments found", 60, 200);
+        return;  // stop drawing further
     }
 
     // draw the battery percent at top right
-    canvas.setTextColor(15); // black
+    canvas.setTextColor(15);  // black
     canvas.drawString("Bat: " + String(bat_pct) + "%", 430, 10);
 
     // ----------------------------
@@ -96,10 +102,14 @@ void drawDashboard(M5EPD_Canvas &canvas, const std::vector<AssignmentItem> &item
             String label;
 
             // choose special labels for yesterday/today/tomorrow
-            if (it.dateYmd == yesterday) label = "YESTERDAY";
-            else if (it.dateYmd == today) label = "TODAY";
-            else if (it.dateYmd == tomorrow) label = "TOMORROW";
-            else {
+            if (it.dateYmd == yesterday)
+                label = "YESTERDAY";
+            else if (it.dateYmd == today)
+                label = "TODAY";
+            else if (it.dateYmd == tomorrow)
+                label = "TOMORROW";
+            else
+            {
                 // otherwise display MM/DD
                 label = it.dateYmd.substring(4, 6) + "/" + it.dateYmd.substring(6, 8);
             }
@@ -109,7 +119,7 @@ void drawDashboard(M5EPD_Canvas &canvas, const std::vector<AssignmentItem> &item
 
             // draw header text
             canvas.setTextSize(4);
-            canvas.setTextColor(15); // black
+            canvas.setTextColor(15);  // black
             canvas.drawString(label, 20, currentY);
 
             // draw line under header
@@ -133,7 +143,7 @@ void drawDashboard(M5EPD_Canvas &canvas, const std::vector<AssignmentItem> &item
             canvas.fillRect(10, currentY, 520, 85, 15);
 
             // set text to black on white
-            canvas.setTextColor(0); // white? (depends on your palette)
+            canvas.setTextColor(0);  // white? (depends on your palette)
             // NOTE: In your original code you used 0 for "white text".
             // If the colors look inverted, swap 0 and 15 in this renderer.
         }
@@ -147,9 +157,7 @@ void drawDashboard(M5EPD_Canvas &canvas, const std::vector<AssignmentItem> &item
         canvas.drawString(it.courseName, 30, currentY + 10);
 
         // truncate title if long (same rule you used)
-        String titleToDraw = it.title.length() > 22
-            ? it.title.substring(0, 19) + "..."
-            : it.title;
+        String titleToDraw = it.title.length() > 22 ? it.title.substring(0, 19) + "..." : it.title;
 
         // title line
         canvas.drawString(titleToDraw, 30, currentY + 45);
@@ -161,6 +169,7 @@ void drawDashboard(M5EPD_Canvas &canvas, const std::vector<AssignmentItem> &item
         currentY += 95;
 
         // stop drawing when screen is full (same as before)
-        if (currentY > 900) break;
+        if (currentY > 900)
+            break;
     }
 }

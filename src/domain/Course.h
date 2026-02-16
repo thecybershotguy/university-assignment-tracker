@@ -1,7 +1,8 @@
 #pragma once
 #include <Arduino.h>
 
-struct Course {
+struct Course
+{
     String name;
     String url;
 };

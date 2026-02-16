@@ -2,18 +2,18 @@
 
 #include "AppConfig.h"
 
-class NetworkManager {
+class NetworkManager
+{
+   public:
+    explicit NetworkManager(const AppConfig& cfg);
 
-    public: 
-        explicit NetworkManager(const AppConfig& cfg);
+    bool begin();
 
-        bool begin();
+   private:
+    const AppConfig& cfg_;
+    static constexpr const char* NTP_SERVER = "pool.ntp.org";
 
-    private:
-        const AppConfig& cfg_;
-        static constexpr const char* NTP_SERVER = "pool.ntp.org";
-        
-        bool connectWifi_();
-        bool syncTime_();
-        static bool waitForValidTime_(int timeoutMs);
+    bool connectWifi_();
+    bool syncTime_();
+    static bool waitForValidTime_(int timeoutMs);
 };

@@ -11,5 +11,4 @@ struct AppConfig
 
     Course* courses;
     int courseCount;
-
 };

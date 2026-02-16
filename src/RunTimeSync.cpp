@@ -4,16 +4,17 @@
 #include "domain/AssignmentService.h"
 #include "net/NetworkManager.h"
 
-static void waitForValidTime(){
+static void waitForValidTime()
+{
     struct tm now_tm;
-        do {
-            getLocalTime(&now_tm);
-            delay(500);
-        } while (now_tm.tm_year < 120);
+    do
+    {
+        getLocalTime(&now_tm);
+        delay(500);
+    } while (now_tm.tm_year < 120);
 }
 
-
-void runRuntimeSync(const AppConfig &cfg, M5EPD_Canvas &canvas)
+void runRuntimeSync(const AppConfig& cfg, M5EPD_Canvas& canvas)
 {
     NetworkManager net(cfg);
     bool netOk = net.begin();
@@ -21,10 +22,11 @@ void runRuntimeSync(const AppConfig &cfg, M5EPD_Canvas &canvas)
     std::vector<AssignmentItem> items;
     bool hasItems = false;
 
-    if(netOk){
+    if (netOk)
+    {
         hasItems = fetchAssignmentItems(cfg, items);
     };
 
-    drawDashboard(canvas, items, netOk , hasItems);
+    drawDashboard(canvas, items, netOk, hasItems);
     canvas.pushCanvas(0, 0, UPDATE_MODE_GC16);
 }
