@@ -1,9 +1,8 @@
 #include "RunTimeSync.h"
-#include <WiFi.h>
 #include <HTTPClient.h>
-#include <time.h>
 #include "ui/DashboardRenderer.h"
 #include "domain/AssignmentService.h"
+#include "net/NetworkManager.h"
 
 static void waitForValidTime(){
     struct tm now_tm;
@@ -16,21 +15,8 @@ static void waitForValidTime(){
 
 void runRuntimeSync(const AppConfig &cfg, M5EPD_Canvas &canvas)
 {
-    // 1) Connect WiFi
-    WiFi.begin(cfg.wifiSsid, cfg.wifiPass);
-
-    while (WiFi.status() != WL_CONNECTED) {
-        delay(500);
-        Serial.print(".");
-    }
-    Serial.println("\nWiFi Connected!");
-
-    // 2) Sync NTP
-    configTime(cfg.timezoneOffsetSec, 0, "pool.ntp.org");
-    Serial.print("Syncing NTP");
-    waitForValidTime();
-    Serial.println("\nTime Synced!");
-
+    NetworkManager net(cfg);
+    net.begin();
     std::vector<AssignmentItem> items;
     fetchAssignmentItems(cfg, items);
     drawDashboard(canvas, items);
