@@ -2,10 +2,8 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <time.h>
-#include <secerts.h>
-
-
-struct Course { String name; String url; };
+#include "secerts.h"
+#include "AppConfig.h"
 
 // Add your specific course URLs here
 Course myCourses[] = {
@@ -15,7 +13,14 @@ Course myCourses[] = {
     {"Software Security", "https://avenue.cllmcmaster.ca/d2l/le/calendar/feed/user/feed.ics?feedOU=761367&token=ahng2k589kh86pee36c86"}
 };
 
-const int numCourses = sizeof(myCourses) / sizeof(myCourses[0]);
+AppConfig appConfig = {
+    WIFI_SSID, 
+    WIFI_PASS, 
+    -7 *3600,
+    myCourses, 
+    sizeof(myCourses) / sizeof(myCourses[0])
+};
+
 M5EPD_Canvas canvas(&M5.EPD);
 
 void setup() {
@@ -26,12 +31,12 @@ void setup() {
     canvas.createCanvas(540, 960);
     
     // 1. Connect WiFi
-    WiFi.begin(WIFI_SSID, WIFI_PASS);
+    WiFi.begin(appConfig.wifiSsid, appConfig.wifiPass);
     while (WiFi.status() != WL_CONNECTED) { delay(500); Serial.print("."); }
     Serial.println("\nWiFi Connected!");
 
     // 2. Sync Time (Calgary MST is UTC-7)
-    configTime(-7 * 3600, 0, "pool.ntp.org");
+    configTime(appConfig.timezoneOffsetSec, 0, "pool.ntp.org");
 
     // CRITICAL FIX: Wait until year is valid (not 1970)
     struct tm now_tm;
@@ -74,11 +79,9 @@ void setup() {
     String lastHeader = "";
 
     // 5. Fetch & Parse
-    for (int i = 0; i < numCourses; i++) {
-        if(myCourses[i].url.startsWith("URL_")) continue; // Skip placeholders
-        
+    for (int i = 0; i < appConfig.courseCount; i++) {
         HTTPClient http;
-        http.begin(myCourses[i].url);
+        http.begin(appConfig.courses[i].url);
         if (http.GET() == HTTP_CODE_OK) {
             String payload = http.getString();
             int searchPos = 0;
@@ -112,7 +115,7 @@ void setup() {
                     deadline_tm.tm_min = mn;
                     
                     // Logic: Input is UTC. We treat it as local, then subtract 7 hours.
-                    time_t deadline_raw = mktime(&deadline_tm) - (7 * 3600);
+                    time_t deadline_raw = mktime(&deadline_tm) + appConfig.timezoneOffsetSec;
                     struct tm * local_deadline = localtime(&deadline_raw);
                     
                     char dBuf[10], tBuf[10];
@@ -150,13 +153,13 @@ void setup() {
                         canvas.setTextColor(15); // Black text
                     }
 
-                    canvas.drawString(myCourses[i].name, 30, currentY + 10);
+                    canvas.drawString(appConfig.courses[i].name, 30, currentY + 10);
                     // Truncate long titles
                     canvas.drawString(title.length() > 22 ? title.substring(0, 19) + "..." : title, 30, currentY + 45);
                     canvas.drawString(localTime, 440, currentY + 10);
                     
                     // Clean Debug Log
-                    Serial.printf("[%s] %s %s - %s\n", localDate.c_str(), localTime.c_str(), myCourses[i].name.c_str(), title.c_str());
+                    Serial.printf("[%s] %s %s - %s\n", localDate.c_str(), localTime.c_str(), appConfig.courses[i].name.c_str(), title.c_str());
                     
                     currentY += 95;
                 }
