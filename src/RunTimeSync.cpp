@@ -16,9 +16,15 @@ static void waitForValidTime(){
 void runRuntimeSync(const AppConfig &cfg, M5EPD_Canvas &canvas)
 {
     NetworkManager net(cfg);
-    net.begin();
+    bool netOk = net.begin();
+
     std::vector<AssignmentItem> items;
-    fetchAssignmentItems(cfg, items);
-    drawDashboard(canvas, items);
+    bool hasItems = false;
+
+    if(netOk){
+        hasItems = fetchAssignmentItems(cfg, items);
+    };
+
+    drawDashboard(canvas, items, netOk , hasItems);
     canvas.pushCanvas(0, 0, UPDATE_MODE_GC16);
 }

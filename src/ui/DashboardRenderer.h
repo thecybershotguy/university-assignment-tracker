@@ -4,4 +4,4 @@
 #include "domain/AssignmentItem.h"
 
 
-void drawDashboard(M5EPD_Canvas& canvas, const std::vector<AssignmentItem>& items);
+void drawDashboard(M5EPD_Canvas& canvas, const std::vector<AssignmentItem>& items,  bool networkOk, bool hasItems);

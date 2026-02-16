@@ -9,7 +9,7 @@ static String ymdFromTm(const struct tm& t)
     return String(buf);
 }
 
-void drawDashboard(M5EPD_Canvas &canvas, const std::vector<AssignmentItem> &items)
+void drawDashboard(M5EPD_Canvas &canvas, const std::vector<AssignmentItem> &items, bool networkOk, bool hasItems)
 {
     // ----------------------------
     // 1) Compute Today/Yesterday/Tomorrow labels
@@ -55,6 +55,21 @@ void drawDashboard(M5EPD_Canvas &canvas, const std::vector<AssignmentItem> &item
 
     // text size for header
     canvas.setTextSize(2);
+
+    if (networkOk) {
+    canvas.setTextColor(15);
+    canvas.drawString("ONLINE", 20, 10);
+    } else {
+    canvas.setTextColor(15);
+    canvas.drawString("OFFLINE", 20, 10);
+    }
+
+    if (!hasItems) {
+    canvas.setTextSize(3);
+    canvas.setTextColor(15);
+    canvas.drawString("No assignments found", 60, 200);
+    return;  // stop drawing further
+    }
 
     // draw the battery percent at top right
     canvas.setTextColor(15); // black
