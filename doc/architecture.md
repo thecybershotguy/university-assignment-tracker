@@ -6,52 +6,54 @@ This document outlines the high-level design and component responsibilities of t
 
 The following diagram visualizes the interaction between the user, external web services, and the internal hardware modules of the M5Paper.
 
-```plantuml
-@startuml
-!theme vibrant
-skinparam componentStyle rectangle
-' Forces lines to use 90-degree angles for a "blueprint" look
-skinparam linetype ortho 
+```mermaid
+flowchart TB
+  %% Title node (Mermaid doesn't have a true title in GitHub Markdown)
+  TITLE["University Assignment Tracker<br/>High-level Architecture"]
 
-title University Assignment Tracker High-level Architecture
+  TITLE --> U
+  TITLE --> W
+  TITLE --> H
 
-package "User" as UserDevice {
-  [Laptop / Phone]
-} 
+  %% User
+  subgraph U["User"]
+    direction TB
+    USERDEV[Laptop / Phone]
+  end
 
-package "Web" as Cloud {
-  [iCal Providers] 
-  [NTP] as NTP
-}
+  %% Web / Cloud
+  subgraph W["Web"]
+    direction TB
+    ICAL[iCal Providers]
+    NTP[NTP]
+  end
 
-' Grouping internal hardware to stay together
-package "M5Paper Hardware" {
-  component "Connectivity" as Net
-  component "Memory" as Store
-  component "Management" as Main
-  component "Display" as Screen
-  
-  ' Use notes attached to the bottom
-  note bottom of Net: Web Server for Setup\n& iCal Data Fetching
-  note bottom of Store: Persistent Storage (NVS)\nfor WiFi & URLs
-  note bottom of Main: Handles Boot Logic\n& Power (Deep Sleep)
-  note bottom of Screen: E-Ink Output\n(Assignments & UI)
-}
+  %% M5Paper Hardware
+  subgraph H["M5Paper Hardware"]
+    direction TB
+    Net[Connectivity]
+    Store[Memory]
+    Main[Management]
+    Screen[Display]
+  end
 
-' --- Strategic Line Routing ---
+  %% External interactions
+  USERDEV -->|Setup| Net
+  ICAL -->|Data| Net
+  NTP -->|Time Sync| Net
 
-' 1. Move User and Cloud above the hardware
-UserDevice -down-> Net : " Setup "
-Cloud -down-> Net :  "  Data  " 
+  %% Internal interactions
+  Net <--> |Config| Store
+  Store --> Main
+  Main -->|Render| Screen
 
-' 2. Keep Config horizontal between Net and Store
-Net <--> Store :  " Config "
+  %% Responsibility "notes" (modeled as callouts)
+  NetNote["Web Server for Setup<br/>& iCal Data Fetching"]
+  StoreNote["Persistent Storage (NVS)<br/>for WiFi & URLs"]
+  MainNote["Handles Boot Logic<br/>& Power (Deep Sleep)"]
+  ScreenNote["E-Ink Output<br/>(Assignments & UI)"]
 
-' 3. Put Management and Display on their own flow
-Net -[hidden]right- Store
-Store -[hidden]right- Main
-
-' 4. Main to Screen flow
-Main -down-> Screen : " Render "
-
-@enduml
+  Net -.-> NetNote
+  Store -.-> StoreNote
+  Main -.-> MainNote
+  Screen -.-> ScreenNote

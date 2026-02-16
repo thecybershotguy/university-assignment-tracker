@@ -1,4 +1,4 @@
-"""# System Behavior & Execution Lifecycle
+# System Behavior & Execution Lifecycle
 
 This document defines the operational states of the **M5Paper**, focusing on the transitions between **Deep Sleep (Power Off)** and the **Active Session (Power On)**.
 
@@ -6,70 +6,58 @@ This document defines the operational states of the **M5Paper**, focusing on the
 
 The following diagram illustrates how the system branches between configuration and runtime based on user input and memory state.
 
-```plantuml
-@startuml
-!theme toy
-skinparam backgroundColor #FFFFFF
-skinparam activity {
-  BackgroundColor<<Config>> #E3F2FD
-  BorderColor<<Config>> #1565C0
-  BackgroundColor<<Runtime>> #F1F8E9
-  BorderColor<<Runtime>> #2E7D32
-}
+```mermaid
+flowchart TD
+  T["System Execution Lifecycle"] --> P["Power On\nTriggered by Timer\nor First Touch"]
 
-title System Execution Lifecycle
+  %% Initial NVS Check
+  P --> N{NVS Config Valid?}
+  N -- No --> C1
+  N -- Yes --> L[Load Config from NVS]
 
-start
+  %% Configuration Mode (initial provisioning)
+  subgraph CONFIG["Configuration Mode"]
+    direction TB
+    C1[Start Web Portal] --> C2[Wait for User Submit] --> C3[Save to NVS]
+  end
 
-:Power On;
-note left: Triggered by Timer\\nor First Touch
+  %% Main Application Loop (handles refresh after submit)
+  C3 --> RT1
+  L --> RT1
 
-' Initial NVS Check
-if (**NVS Config Valid?**) then (No)
-  partition "Configuration Mode" <<Config>> {
-    :Start Web Portal;
-    :Wait for User 'Submit';
-    :Save to NVS;
-  }
-else (Yes)
-  :Load Config from NVS;
-endif
+  %% Runtime Mode
+  subgraph RUNTIME["Runtime Mode"]
+    direction TB
+    RT1[Connect to WiFi and Fetch ICS Data] --> RT2[Convert UTC to Local Calgary] --> RT3[Draw Assignment Dashboard]
+  end
 
-' Main Application Loop (Handles "Refresh after Submit")
-repeat
-  partition "Runtime Mode" <<Runtime>> {
-    :Connect to WiFi & Fetch .ics Data;
-    :Convert UTC to Local (Calgary);
-    :Draw Assignment Dashboard;
-  }
+  %% Active Session
+  RT3 --> AS0
 
-  partition "Active Session (Powered ON)" <<Runtime>> {
-    :Enable Touch Interrupts;
-    :Start 5-Minute Safety Timer;
-    
-    ' Interaction Loop
-    while (**Timer > 0?**) is (Yes)
-      if (Screen Tapped?) then (Yes)
-        if (Tapped Gear?) then (Yes)
-          partition "Configuration Mode" <<Config>> {
-            :Start Web Portal;
-            :Wait for User 'Submit';
-            :Save to NVS;
-            ' Re-triggering the loop to show new data immediately
-            detach
-          }
-        else (Tapped Navigation)
-          :Update E-Ink Page;
-          :Reset 5-Minute Timer;
-        endif
-      endif
-      :Wait for next tap;
-    endwhile
-  }
-' The loop only repeats if a config change was made via the Gear icon
-repeat while (Config Changed?) is (Yes)
+  subgraph ACTIVE["Active Session Powered ON"]
+    direction TB
+    AS0[Enable Touch Interrupts] --> AS1[Start 5 Minute Safety Timer] --> TQ{Timer > 0?}
 
-:Configure Touch Wake-up Pin;
-:Enter Deep Sleep;
-stop
-@enduml
+    %% Interaction loop
+    TQ -- Yes --> TAP{Screen Tapped?}
+    TAP -- No --> WAIT[Wait for next tap] --> TQ
+    TAP -- Yes --> GEAR{Tapped Gear?}
+    GEAR -- No --> NAV[Update E Ink Page] --> RESET[Reset 5 Minute Timer] --> TQ
+    GEAR -- Yes --> CFG2
+  end
+
+  %% Re-enter Configuration Mode via Gear
+  subgraph CONFIG2["Configuration Mode via Gear"]
+    direction TB
+    CFG2[Start Web Portal] --> CFG3[Wait for User Submit] --> CFG4[Save to NVS]
+  end
+
+  %% End of Active Session / Loop condition
+  TQ -- No --> CHK{Config Changed?}
+  CFG4 --> CHK
+
+  %% Repeat only if config changed
+  CHK -- Yes --> RT1
+
+  %% Deep sleep path
+  CHK -- No --> WU[Configure Touch Wake up Pin] --> DS[Enter Deep Sleep] --> END((Stop))
