@@ -4,8 +4,8 @@
 #include <time.h>
 #include "AppConfig.h"
 #include "RunTimeSync.h"
-#include "storage/HardCodedConfigProvider.h"
-#include "storage/NullAssignmentSnapshotStore.h"
+#include "storage/config/HardCodedConfigProvider.h"
+#include "storage/snapshot/NullAssignmentSnapshotStore.h"
 
 M5EPD_Canvas canvas(&M5.EPD);
 

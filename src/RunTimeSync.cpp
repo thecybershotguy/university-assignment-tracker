@@ -3,7 +3,7 @@
 #include "ui/DashboardRenderer.h"
 #include "domain/AssignmentService.h"
 #include "net/NetworkManager.h"
-#include "storage/IAssignmentSnapshotStore.h"
+#include "storage/snapshot/IAssignmentSnapshotStore.h"
 
 static void waitForValidTime()
 {
