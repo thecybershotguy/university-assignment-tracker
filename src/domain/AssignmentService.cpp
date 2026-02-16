@@ -1,12 +1,24 @@
 #include "AssignmentService.h"
-
+#include <algorithm>
 #include <HTTPClient.h>
 #include <time.h>
+
 bool fetchAssignmentItems(const AppConfig &cfg, std::vector<AssignmentItem> &out)
 {
     out.clear();
 
     for (int i = 0; i < cfg.courseCount; i++) {
+        struct tm now_tm;
+        getLocalTime(&now_tm);
+        time_t now_raw = mktime(&now_tm);
+            
+        time_t yesterday_raw = now_raw - 86400;
+        struct tm* tm_yesterday = localtime(&yesterday_raw);
+            
+        char yBuf[12];
+        strftime(yBuf, sizeof(yBuf), "%Y%m%d", tm_yesterday);
+        String yesterday = String(yBuf);
+
         HTTPClient http;
         http.begin(cfg.courses[i].url);
 
@@ -47,17 +59,29 @@ bool fetchAssignmentItems(const AppConfig &cfg, std::vector<AssignmentItem> &out
                     String localDate = String(dBuf);
                     String localTime = String(tBuf);
 
-                    if (!localDate.startsWith("2026") || title.indexOf("Lecture") != -1) {
+                    if (localDate < yesterday) {
+                        searchPos += 12;
+                        continue;
+                    }
+                    
+                    if (!localDate.startsWith("2026")) {
                         searchPos += 12;
                         continue;
                     }
 
+                    uint32_t y = localDate.substring(0,4).toInt();
+                    uint32_t m = localDate.substring(4,6).toInt();
+                    uint32_t d = localDate.substring(6,8).toInt();
+                    uint32_t hh = localTime.substring(0,2).toInt();
+                    uint32_t mm = localTime.substring(3,5).toInt();
+                    
                     // Instead of drawing, push to vector
                     AssignmentItem item;
                     item.dateYmd = localDate;
                     item.timeHm = localTime;
                     item.courseName = cfg.courses[i].name;
                     item.title = title;
+                    item.sortKey = (((y * 100 + m) * 100 + d) * 100 + hh) * 100 + mm;
                     out.push_back(item);
 
                     // Keep your debug log if you want (still no behavior change)
@@ -74,5 +98,10 @@ bool fetchAssignmentItems(const AppConfig &cfg, std::vector<AssignmentItem> &out
         }
         http.end();
     }
+    std::sort(out.begin(), out.end(), [](const AssignmentItem& a, const AssignmentItem& b) {
+    if (a.sortKey != b.sortKey) return a.sortKey < b.sortKey;
+    if (a.courseName != b.courseName) return a.courseName < b.courseName;
+    return a.title < b.title;
+    });
     return !out.empty();
 }

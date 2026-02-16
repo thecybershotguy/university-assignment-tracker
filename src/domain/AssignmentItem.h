@@ -7,4 +7,5 @@ struct AssignmentItem{
     String timeHm;       // HH:MM
     String courseName;   
     String title;
+    uint32_t sortKey;    // YYYYMMDDHHMM as a number 
 };
