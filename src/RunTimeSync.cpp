@@ -3,6 +3,7 @@
 #include "ui/DashboardRenderer.h"
 #include "domain/AssignmentService.h"
 #include "net/NetworkManager.h"
+#include "storage/IAssignmentSnapshotStore.h"
 
 static void waitForValidTime()
 {
@@ -14,7 +15,8 @@ static void waitForValidTime()
     } while (now_tm.tm_year < 120);
 }
 
-void runRuntimeSync(const AppConfig& cfg, M5EPD_Canvas& canvas)
+void runRuntimeSync(const AppConfig& cfg, M5EPD_Canvas& canvas,
+                    IAssignmentSnapshotStore& snapshotStore)
 {
     NetworkManager net(cfg);
     bool netOk = net.begin();

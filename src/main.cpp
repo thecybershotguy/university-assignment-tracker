@@ -5,6 +5,7 @@
 #include "AppConfig.h"
 #include "RunTimeSync.h"
 #include "storage/HardCodedConfigProvider.h"
+#include "storage/NullAssignmentSnapshotStore.h"
 
 M5EPD_Canvas canvas(&M5.EPD);
 
@@ -19,8 +20,9 @@ void setup()
     HardCodedConfigProvider provider;
     AppConfig appConfig;
     provider.load(appConfig);
+    NullAssignmentSnapshotStore snapshotStore;
 
-    runRuntimeSync(appConfig, canvas);
+    runRuntimeSync(appConfig, canvas, snapshotStore);
     Serial.println("Updated. Sleeping...");
     delay(1000);
     M5.shutdown(7200);

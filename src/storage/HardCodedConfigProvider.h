@@ -1,5 +1,5 @@
 #pragma once
-#include "IConfigProivder.h"
+#include "IConfigProvider.h"
 
 class HardCodedConfigProvider : public IConfigProvider
 {
