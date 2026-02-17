@@ -7,7 +7,7 @@ bool fetchAssignmentItems(const AppConfig& cfg, std::vector<AssignmentItem>& out
 {
     out.clear();
 
-    for (int i = 0; i < cfg.courseCount; i++)
+    for (int i = 0; i < cfg.courses.size(); i++)
     {
         struct tm now_tm;
         getLocalTime(&now_tm);

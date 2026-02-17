@@ -17,7 +17,7 @@ bool NetworkManager::begin()
 
 bool NetworkManager::connectWifi_()
 {
-    WiFi.begin(cfg_.wifiSsid, cfg_.wifiPass);
+    WiFi.begin(cfg_.wifiSsid.c_str(), cfg_.wifiPass.c_str());
 
     while (WiFi.status() != WL_CONNECTED)
     {
@@ -51,7 +51,7 @@ bool NetworkManager::waitForValidTime_(int timeoutMs)
 bool NetworkManager::syncTime_()
 {
     configTime(cfg_.timezoneOffsetSec, 0, NTP_SERVER);
-    Serial.print("Syncing NTP");
+    Serial.print("\nSyncing NTP");
 
     // Keep identical behavior: block until time looks valid
     bool ok = waitForValidTime_(15000);

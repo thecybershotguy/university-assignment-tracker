@@ -4,7 +4,7 @@
 #include <time.h>
 #include "AppConfig.h"
 #include "RunTimeSync.h"
-#include "storage/config/HardCodedConfigProvider.h"
+#include "storage/config/CompositeConfigProvider.h"
 #include "storage/snapshot/NullAssignmentSnapshotStore.h"
 
 M5EPD_Canvas canvas(&M5.EPD);
@@ -17,13 +17,14 @@ void setup()
     M5.EPD.Clear(true);
     canvas.createCanvas(540, 960);
 
-    HardCodedConfigProvider provider;
+    CompositeConfigProvider cfgProvider;
+    cfgProvider.seedFromHardcodedIfEmpty();  // dev only; remove later
     AppConfig appConfig;
-    provider.load(appConfig);
+    cfgProvider.load(appConfig);
     NullAssignmentSnapshotStore snapshotStore;
 
     runRuntimeSync(appConfig, canvas, snapshotStore);
-    Serial.println("Updated. Sleeping...");
+    Serial.println("Display Updated. Sleeping");
     delay(1000);
     M5.shutdown(7200);
 }

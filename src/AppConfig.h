@@ -4,11 +4,10 @@
 
 struct AppConfig
 {
-    const char* wifiSsid;
-    const char* wifiPass;
+    String wifiSsid;
+    String wifiPass;
 
-    long timezoneOffsetSec;
+    long timezoneOffsetSec = 0;
 
-    Course* courses;
-    int courseCount;
+    std::vector<Course> courses;
 };
