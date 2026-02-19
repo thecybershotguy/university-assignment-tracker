@@ -135,7 +135,8 @@ This separation simplifies future refactoring and testing.
 
 1. Clone this repository  
 2. Create `src/secrets.h`:
-
-```cpp
-#define WIFI_SSID "YOUR_WIFI_NAME"
-#define WIFI_PASS "YOUR_WIFI_PASS"
+    ```cpp
+    #define WIFI_SSID "YOUR_WIFI_NAME"
+    #define WIFI_PASS "YOUR_WIFI_PASS"
+    ```
+3.  Build and upload using PlatformIO.
