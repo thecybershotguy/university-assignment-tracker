@@ -4,8 +4,6 @@ A low-power, WiFi-enabled E-Ink dashboard that automatically tracks university a
 
 Designed for long battery life, clean readability, and zero daily interaction.
 
-![Dashboard](docs/images/Dashboard.jpg)
-
 ---
 
 ## 📸 Interface Preview
@@ -14,7 +12,7 @@ Designed for long battery life, clean readability, and zero daily interaction.
 Displays assignments grouped by **Yesterday**, **Today**, and **Tomorrow**.  
 Includes battery monitoring and online/offline status indicator.
 
-![Dashboard](docs/images/Dashboard.jpg)
+![Dashboard](doc/images/Dashboard.jpg)
 
 ---
 
@@ -25,14 +23,14 @@ Users submit:
 - WiFi credentials  
 - Course iCal URLs  
 
-![Setup Mode](docs/images/SetupMode.jpg)
+![Setup Mode](doc/images/SetupMode.jpg)
 
 ---
 
 ### 🌐 Web Configuration Portal
 Accessible anytime via the on-screen gear icon to update settings.
 
-![Web Portal](docs/images/WebPortal.jpg)
+![Web Portal](doc/images/WebPortal.jpg)
 
 ---
 
