@@ -32,8 +32,6 @@ void setup()
     cfgProvider.seedFromHardcodedIfEmpty();
     AppConfig appConfig;
     cfgProvider.load(appConfig);
-    runRuntimeSync(appConfig, canvas, snapshotStore);
-
 #else
     // PROD: if no valid NVS config -> setup portal
     AppConfig appConfig;
@@ -44,8 +42,8 @@ void setup()
         return;
     }
 
-    runRuntimeSync(appConfig, canvas, snapshotStore);
 #endif
+    runRuntimeSync(appConfig, canvas, snapshotStore);
 
     Serial.println("Display Updated. Sleeping");
     delay(1000);

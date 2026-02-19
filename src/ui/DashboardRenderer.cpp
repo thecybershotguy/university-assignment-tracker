@@ -69,6 +69,18 @@ void drawDashboard(M5EPD_Canvas& canvas, const std::vector<AssignmentItem>& item
         canvas.drawString("OFFLINE", 20, 10);
     }
 
+    if (!networkOk)
+    {
+        canvas.setTextSize(4);
+        canvas.setTextColor(15);
+        canvas.drawString("OFFLINE", 60, 200);
+
+        canvas.setTextSize(2);
+        canvas.drawString("Could not connect to WiFi.", 60, 250);
+        canvas.drawString("Press setup to reconfigure.", 60, 280);
+        return;
+    }
+
     if (!hasItems)
     {
         canvas.setTextSize(3);

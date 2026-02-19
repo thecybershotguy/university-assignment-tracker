@@ -17,15 +17,31 @@ bool NetworkManager::begin()
 
 bool NetworkManager::connectWifi_()
 {
+    Serial.printf("Connecting to WiFi: %s\n", cfg_.wifiSsid.c_str());
+
+    WiFi.mode(WIFI_STA);
+    WiFi.disconnect(true);
+    delay(100);
+
     WiFi.begin(cfg_.wifiSsid.c_str(), cfg_.wifiPass.c_str());
+
+    const unsigned long timeoutMs = 15000;  // 15s
+    unsigned long start = millis();
 
     while (WiFi.status() != WL_CONNECTED)
     {
+        if (millis() - start > timeoutMs)
+        {
+            Serial.println("\n[NET] WiFi connect TIMEOUT");
+            WiFi.mode(WIFI_OFF);
+            return false;
+        }
+
         delay(500);
         Serial.print(".");
     }
 
-    Serial.print("\nWifi Connected");
+    Serial.println("\n[NET] WiFi Connected");
     return true;
 }
 
