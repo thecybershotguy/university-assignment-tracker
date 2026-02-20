@@ -1,14 +1,19 @@
 #include <M5EPD.h>
 #include <WiFi.h>
 #include <time.h>
+#include <HTTPClient.h>
 #include "AppConfig.h"
-#include "RunTimeSync.h"
 
 #include "storage/config/CompositeConfigProvider.h"
 #include "storage/config/NvsConfigProvider.h"
 #include "storage/snapshot/NullAssignmentSnapshotStore.h"
 
-#include "setup/SetupPortal.h"
+#include "setup/SetupMode.h"
+#include "setup/SetupEntryReason.h"
+#include "ui/DashboardRenderer.h"
+#include "domain/AssignmentService.h"
+#include "net/NetworkManager.h"
+#include "storage/snapshot/IAssignmentSnapshotStore.h"
 
 M5EPD_Canvas canvas(&M5.EPD);
 
@@ -37,13 +42,35 @@ void setup()
     AppConfig appConfig;
     if (!nvs.hasConfig() || !nvs.load(appConfig))
     {
-        SetupPortal portal(canvas, nvs);
-        portal.run();  // blocks until save/clear triggers restart
+        SetupMode setupMode(canvas, nvs);
+        setupMode.run(SetupEntryReason::NoConfig);
         return;
     }
 
 #endif
-    runRuntimeSync(appConfig, canvas, snapshotStore);
+
+    Serial.printf("WiFi SSID in use: %s\n", appConfig.wifiSsid.c_str());
+    Serial.printf("Course count: %d\n", (int)appConfig.courses.size());
+    Serial.printf("Timezone offset: %ld\n", appConfig.timezoneOffsetSec);
+
+    NetworkManager net(appConfig);
+    bool netOk = net.begin();
+
+    std::vector<AssignmentItem> items;
+    bool hasItems = false;
+
+    if (netOk)
+    {
+        hasItems = fetchAssignmentItems(appConfig, items);
+        drawDashboard(canvas, items, hasItems);
+        canvas.pushCanvas(0, 0, UPDATE_MODE_GC16);
+    }
+    else
+    {
+        SetupMode setupMode(canvas, nvs);
+        setupMode.run(SetupEntryReason::WifiFailed);
+        return;
+    }
 
     Serial.println("Display Updated. Sleeping");
     delay(1000);

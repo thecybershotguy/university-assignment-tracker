@@ -54,14 +54,21 @@ Architecture reference:
 - [x] Disable WiFi radio after timeout
 
 ## Failure UX
-- [ ] If WiFi fails → enter Setup Mode automatically
-- [ ] Setup screen shows "WiFi connection failed"
-- [ ] Setup portal preloads existing config (SSID + timezone + iCal rows)
+- [x] If WiFi fails → enter Setup Mode automatically
+- [x] Setup screen shows "WiFi connection failed"
+- [x] Setup portal preloads existing config (SSID + timezone + iCal rows)
+
+## State Machine Implementation
+- [ ] Add enum class AppState { Boot, Setup, Runtime, Sleep };
+- [ ] setup() sets state = Boot
+- [ ] loop() runs a switch(state) and calls tick() functions
+- [ ] SetupMode becomes non-blocking (no while(true))
 
 ## Setup Portal Improvements
 - [ ] Dynamic HTML (replace static PROGMEM page)
 - [ ] Prefill existing config (SSID + timezone + iCal rows)
 - [ ] Allow blank password to retain existing value
+- [ ] Convert enum to map to avoid swtich case
 
 ## Power Mode Policy
 

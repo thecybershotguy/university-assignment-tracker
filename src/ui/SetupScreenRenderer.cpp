@@ -1,11 +1,30 @@
 #include "ui/SetupScreenRenderer.h"
+#include "SetupScreenRenderer.h"
 
 static void safePushCanvas(M5EPD_Canvas& canvas)
 {
     canvas.pushCanvas(0, 0, UPDATE_MODE_GC16);
 }
 
-void drawSetupScreen(M5EPD_Canvas& canvas, const String& apSsid, const IPAddress& apIp)
+static const char* reasonToMsg(SetupEntryReason reason)
+{
+    switch (reason)
+    {
+        case SetupEntryReason::NoConfig:
+            return "";  // no warning needed
+        case SetupEntryReason::WifiFailed:
+            return "WiFi connection failed.";
+        case SetupEntryReason::NtpFailed:
+            return "Time sync failed.";
+        case SetupEntryReason::UserRequested:
+            return "Reconfiguration requested.";
+        default:
+            return "";
+    }
+}
+
+void drawSetupScreen(M5EPD_Canvas& canvas, const String& apSsid, const IPAddress& apIp,
+                     SetupEntryReason setupEntryReason)
 {
     const int W = 540;
     const int H = 960;
@@ -32,6 +51,20 @@ void drawSetupScreen(M5EPD_Canvas& canvas, const String& apSsid, const IPAddress
     // ---------------- Step 1 ----------------
     int y = headerH + 18;
 
+    const char* msg = reasonToMsg(setupEntryReason);
+    // Draw message only if non-empty
+    if (msg[0] != '\0')
+    {
+        canvas.setTextDatum(MC_DATUM);
+        canvas.setTextColor(EINK_BLACK);
+        canvas.setTextSize(2);
+        int msgY = headerH + 20;
+        canvas.drawString(msg, W / 2, msgY);
+        canvas.setTextDatum(TL_DATUM);
+        y += 35;  // space after message
+    }
+
+    // Step 1 starts after message (or immediately after header if no message)
     canvas.setTextColor(EINK_BLACK);
     canvas.setTextSize(2);
     canvas.drawString("1) Connect to this WiFi network:", M, y);

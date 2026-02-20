@@ -29,57 +29,18 @@ static const char SETUP_INDEX_HTML[] PROGMEM = R"HTML(
     <div class="card">
       <h3>WiFi</h3>
       <label>SSID</label>
-      <input name="ssid" placeholder="WiFi SSID" required>
+      <input name="ssid" placeholder="WiFi SSID" required value="{{SSID}}">
 
       <label>Password</label>
       <input name="pass" type="password" placeholder="WiFi Password" required>
 
       <label>Timezone Offset (seconds)</label>
-      <input name="tz" placeholder="-25200 for MST (UTC-7)" value="-25200">
+      <input name="tz" placeholder="-25200 for MST (UTC-7)" value="{{TZ}}">
     </div>
 
     <div class="card">
       <h3>Courses (up to 8)</h3>
-
-      <div class="row">
-        <div><label>Course 1 Name</label><input name="c0n" placeholder="Course 1"></div>
-        <div><label>Course 1 URL</label><input name="c0u" placeholder="https://...feed.ics"></div>
-      </div>
-
-      <div class="row">
-        <div><label>Course 2 Name</label><input name="c1n" placeholder="Course 2"></div>
-        <div><label>Course 2 URL</label><input name="c1u" placeholder="https://...feed.ics"></div>
-      </div>
-
-      <div class="row">
-        <div><label>Course 3 Name</label><input name="c2n" placeholder="Course 3"></div>
-        <div><label>Course 3 URL</label><input name="c2u" placeholder="https://...feed.ics"></div>
-      </div>
-
-      <div class="row">
-        <div><label>Course 4 Name</label><input name="c3n" placeholder="Course 4"></div>
-        <div><label>Course 4 URL</label><input name="c3u" placeholder="https://...feed.ics"></div>
-      </div>
-
-      <div class="row">
-        <div><label>Course 5 Name</label><input name="c4n" placeholder="(optional)"></div>
-        <div><label>Course 5 URL</label><input name="c4u" placeholder="(optional)"></div>
-      </div>
-
-      <div class="row">
-        <div><label>Course 6 Name</label><input name="c5n" placeholder="(optional)"></div>
-        <div><label>Course 6 URL</label><input name="c5u" placeholder="(optional)"></div>
-      </div>
-
-      <div class="row">
-        <div><label>Course 7 Name</label><input name="c6n" placeholder="(optional)"></div>
-        <div><label>Course 7 URL</label><input name="c6u" placeholder="(optional)"></div>
-      </div>
-
-      <div class="row">
-        <div><label>Course 8 Name</label><input name="c7n" placeholder="(optional)"></div>
-        <div><label>Course 8 URL</label><input name="c7u" placeholder="(optional)"></div>
-      </div>
+        {{COURSE_ROWS}}
     </div>
 
     <button type="submit">Save & Reboot</button>

@@ -8,8 +8,7 @@ static String ymdFromTm(const struct tm& t)
     return String(buf);
 }
 
-void drawDashboard(M5EPD_Canvas& canvas, const std::vector<AssignmentItem>& items, bool networkOk,
-                   bool hasItems)
+void drawDashboard(M5EPD_Canvas& canvas, const std::vector<AssignmentItem>& items, bool hasItems)
 {
     // ----------------------------
     // 1) Compute Today/Yesterday/Tomorrow labels
@@ -58,28 +57,8 @@ void drawDashboard(M5EPD_Canvas& canvas, const std::vector<AssignmentItem>& item
     // text size for header
     canvas.setTextSize(2);
 
-    if (networkOk)
-    {
-        canvas.setTextColor(15);
-        canvas.drawString("ONLINE", 20, 10);
-    }
-    else
-    {
-        canvas.setTextColor(15);
-        canvas.drawString("OFFLINE", 20, 10);
-    }
-
-    if (!networkOk)
-    {
-        canvas.setTextSize(4);
-        canvas.setTextColor(15);
-        canvas.drawString("OFFLINE", 60, 200);
-
-        canvas.setTextSize(2);
-        canvas.drawString("Could not connect to WiFi.", 60, 250);
-        canvas.drawString("Press setup to reconfigure.", 60, 280);
-        return;
-    }
+    canvas.setTextColor(15);
+    canvas.drawString("ONLINE", 20, 10);
 
     if (!hasItems)
     {

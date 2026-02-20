@@ -1,70 +1,86 @@
-#include "setup/SetupPortal.h"
+#include "setup/SetupWebPortal.h"
 #include "setup/SetupPages.h"
 #include "ui/SetupScreenRenderer.h"
 #include <ArduinoJson.h>
+#include "SetupWebPortal.h"
 
-static void safePushCanvas(M5EPD_Canvas& canvas)
+SetupWebPortal::SetupWebPortal(NvsConfigProvider& nvs) : nvs_(nvs)
 {
-    canvas.pushCanvas(0, 0, UPDATE_MODE_GC16);
 }
 
-String SetupPortal::chipSuffix_()
+String SetupWebPortal::htmlEscape_(const String& s)
 {
-    uint64_t mac = ESP.getEfuseMac();
-    uint16_t tail = (uint16_t)(mac & 0xFFFF);
-    char buf[8];
-    snprintf(buf, sizeof(buf), "%04X", tail);
-    return String(buf);
+    String o = s;
+    o.replace("&", "&amp;");
+    o.replace("<", "&lt;");
+    o.replace(">", "&gt;");
+    o.replace("\"", "&quot;");
+    o.replace("'", "&#39;");
+    return o;
 }
 
-void SetupPortal::startAp_()
-{
-    apSsid_ = "EpaperSetup-" + chipSuffix_();
-
-    WiFi.mode(WIFI_AP);
-    // Open AP (no password) to keep setup friction low.
-    // If you want a password, use: WiFi.softAP(apSsid_.c_str(), "setup1234");
-    bool ok = WiFi.softAP(apSsid_.c_str());
-
-    apIp_ = WiFi.softAPIP();
-
-    Serial.printf("[SETUP] AP start: %s -> %s (%s)\n", apSsid_.c_str(), apIp_.toString().c_str(),
-                  ok ? "OK" : "FAIL");
-}
-
-void SetupPortal::drawSetupScreen_()
-{
-    drawSetupScreen(canvas_, apSsid_, apIp_);
-}
-
-void SetupPortal::registerRoutes_()
+void SetupWebPortal::registerRoutes_()
 {
     server_.on("/", HTTP_GET, [this]() { handleIndex_(); });
-    server_.on("/status", HTTP_GET, [this]() { handleStatus_(); });
     server_.on("/save", HTTP_POST, [this]() { handleSave_(); });
     server_.on("/clear", HTTP_POST, [this]() { handleClear_(); });
 
     server_.onNotFound([this]() { server_.send(404, "text/plain", "Not Found"); });
 }
 
-void SetupPortal::handleIndex_()
+String SetupWebPortal::renderIndexHtml_()
 {
-    server_.send_P(200, "text/html", SETUP_INDEX_HTML);
+    AppConfig cfg;
+    bool has = nvs_.hasConfig() && nvs_.load(cfg);
+
+    const AppConfig* preload = has ? &cfg : nullptr;
+
+    String page = FPSTR(SETUP_INDEX_HTML);
+
+    page.replace("{{SSID}}", preload ? htmlEscape_(preload->wifiSsid.c_str()) : "");
+    page.replace("{{TZ}}", preload ? String(preload->timezoneOffsetSec) : String(-25200));
+    page.replace("{{COURSE_ROWS}}", buildCourseRowsHtml_(preload));
+
+    return page;
 }
 
-void SetupPortal::handleStatus_()
+String SetupWebPortal::buildCourseRowsHtml_(const AppConfig* preload)
 {
-    StaticJsonDocument<512> doc;
-    doc["apSsid"] = apSsid_;
-    doc["apIp"] = apIp_.toString();
-    doc["nvsHasConfig"] = nvs_.hasConfig();
-
     String out;
-    serializeJson(doc, out);
-    server_.send(200, "application/json", out);
+
+    for (int i = 0; i < MAX_COURSES; i++)
+    {
+        String name = "";
+        String url = "";
+
+        if (preload && i < (int)preload->courses.size())
+        {
+            name = preload->courses[i].name;
+            url = preload->courses[i].url;  // <- match your Course field name
+        }
+
+        out += "<div class='row'>";
+        out += "<div><label>Course " + String(i + 1) +
+               " Name</label>"
+               "<input name='c" +
+               String(i) + "n' value='" + htmlEscape_(name) + "'></div>";
+        out += "<div><label>Course " + String(i + 1) +
+               " URL</label>"
+               "<input name='c" +
+               String(i) + "u' value='" + htmlEscape_(url) + "'></div>";
+        out += "</div>";
+    }
+
+    return out;
 }
 
-void SetupPortal::handleSave_()
+void SetupWebPortal::handleIndex_()
+{
+    String page = renderIndexHtml_();
+    server_.send(200, "text/html", page);
+}
+
+void SetupWebPortal::handleSave_()
 {
     // Basic validation
     String ssid = server_.arg("ssid");
@@ -133,7 +149,7 @@ void SetupPortal::handleSave_()
     ESP.restart();
 }
 
-void SetupPortal::handleClear_()
+void SetupWebPortal::handleClear_()
 {
     Serial.println("[SETUP] Clearing NVS config...");
     bool ok = nvs_.clear();
@@ -143,20 +159,13 @@ void SetupPortal::handleClear_()
     ESP.restart();
 }
 
-void SetupPortal::run()
+void SetupWebPortal::begin()
 {
-    startAp_();
-    drawSetupScreen_();
+    registerRoutes_();  // Attach HTTP handlers
+    server_.begin();    // Start web server
+}
 
-    registerRoutes_();
-    server_.begin();
-
-    Serial.printf("[SETUP] Portal running. Open http://%s/\n", apIp_.toString().c_str());
-
-    // Block forever until user saves/clears (which restarts the device)
-    while (true)
-    {
-        server_.handleClient();
-        delay(5);
-    }
+void SetupWebPortal::loop()
+{
+    server_.handleClient();
 }
