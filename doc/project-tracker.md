@@ -59,14 +59,14 @@ Architecture reference:
 - [x] Setup portal preloads existing config (SSID + timezone + iCal rows)
 
 ## State Machine Implementation
-- [ ] Add enum class AppState { Boot, Setup, Runtime, Sleep };
-- [ ] setup() sets state = Boot
-- [ ] loop() runs a switch(state) and calls tick() functions
-- [ ] SetupMode becomes non-blocking (no while(true))
+- [x] Add enum class AppState { Boot, Setup, Runtime, Sleep };
+- [x] setup() sets state = Boot
+- [x] loop() runs a switch(state) and calls tick() functions
+- [x] SetupMode becomes non-blocking (no while(true))
+- [ ] Replace restart-driven setup completion with an explicit state transition
 
 ## Setup Portal Improvements
 - [ ] Dynamic HTML (replace static PROGMEM page)
-- [ ] Prefill existing config (SSID + timezone + iCal rows)
 - [ ] Allow blank password to retain existing value
 - [ ] Convert enum to map to avoid swtich case
 
